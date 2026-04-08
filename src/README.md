@@ -6,10 +6,10 @@ This repository follows a modular "Layered Architecture" where each directory re
 
 ### 1. `features/` — Data Engineering
 Responsible for transforming raw Kaggle CSVs into high-signal numeric features.
-* **`build_features.py`**: The main pipeline. Handles missing values, clip outliers, and engineers domain features like DTI Ratio, Credit Utilization, and Income Stability scores.
+* **`build_features.py`**: The main pipeline. Handles missing values, clips outliers, and engineers domain features like DTI Ratio, Credit Utilization, and Income Stability scores.
 
 ### 2. `models/` — The Pricing Engine
-* **Layer 1: Risk Modelling**: Training the XGBoost/Logistic ensemble.
+* **Layer 1: Risk Modelling**: Training the Triple Threat ensemble (XGB + LGBM + LR).
 * **Layer 2: Expected Loss (EL)**: Calculating the loss floor ($PD \times LGD \times EAD$).
 * **Layer 3: Price Elasticity**: Modeling the relationship between interest rates and customer conversion.
 * **Layer 4: Optimization Engine**: Using `scipy.optimize` to find the profit-maximizing rate.

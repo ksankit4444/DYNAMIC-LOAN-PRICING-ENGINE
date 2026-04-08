@@ -5,8 +5,9 @@ This directory serves as the "Model Registry" for the engine, containing all ser
 ## Included Artifacts
 
 ### 1. Risk Estimators (Layer 1)
-* `xgboost_model.joblib`: The "Performance" model. Highly accurate at predicting default but less interpretable.
-* `logistic_model.joblib`: The "Compliance" model. A standard scorecard approach required for regulatory explainability.
+* `xgboost_model.joblib`: High-precision gradient boosting model.
+* `lightgbm_model.joblib`: High-efficiency gradient boosting for complex interactions.
+* `logistic_model.joblib`: Compliance-driven scorecard model for auditability.
 
 ### 2. Feature Encoders
 * `woe_encoder.joblib`: Stores the Weight of Evidence (WoE) mappings and Information Value (IV) for all categorical variables.

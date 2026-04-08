@@ -83,10 +83,12 @@ def _load_models():
 
     try:
         _model_cache['xgb_model'] = joblib.load(os.path.join(models_path, 'xgboost_model.joblib'))
+        _model_cache['lgb_model'] = joblib.load(os.path.join(models_path, 'lightgbm_model.joblib'))
         _model_cache['lr_model'] = joblib.load(os.path.join(models_path, 'logistic_model.joblib'))
         _model_cache['lr_scaler'] = joblib.load(os.path.join(models_path, 'logistic_scaler.joblib'))
         _model_cache['shap_explainer'] = joblib.load(os.path.join(models_path, 'shap_explainer.joblib'))
         _model_cache['xgb_feats'] = joblib.load(os.path.join(models_path, 'xgb_feature_columns.joblib'))
+        _model_cache['lgb_feats'] = joblib.load(os.path.join(models_path, 'lgb_feature_columns.joblib'))
         _model_cache['lr_feats'] = joblib.load(os.path.join(models_path, 'lr_feature_columns.joblib'))
         with open(os.path.join(models_path, 'ensemble_config.json'), 'r') as f:
             _model_cache['ensemble_config'] = json.load(f)
@@ -179,23 +181,28 @@ def predict_pd(
     }
 
     xgb_feats = models['xgb_feats']
+    lgb_feats = models['lgb_feats']
     lr_feats = models['lr_feats']
     
     xgb_dict = {col: features.get(col, 0.0) for col in xgb_feats}
+    lgb_dict = {col: features.get(col, 0.0) for col in lgb_feats}
     lr_dict = {col: features.get(col, 0.0) for col in lr_feats}
 
     X_xgb = pd.DataFrame([xgb_dict])[xgb_feats]
+    X_lgb = pd.DataFrame([lgb_dict])[lgb_feats]
     X_lr = pd.DataFrame([lr_dict])[lr_feats]
 
     # Predict
     pd_xgb = float(models['xgb_model'].predict_proba(X_xgb)[:, 1][0])
+    pd_lgb = float(models['lgb_model'].predict_proba(X_lgb)[:, 1][0])
     X_lr_scaled = models['lr_scaler'].transform(X_lr)
     pd_lr = float(models['lr_model'].predict_proba(X_lr_scaled)[:, 1][0])
 
     weights = models['ensemble_config']['optimal_weights']
-    w_xgb = weights.get('xgboost', 0.6)
-    w_lr = weights.get('logistic', 0.4)
-    pd_ensemble = w_xgb * pd_xgb + w_lr * pd_lr
+    w_xgb = weights.get('xgboost', 0.4)
+    w_lgb = weights.get('lightgbm', 0.3)
+    w_lr = weights.get('logistic', 0.3)
+    pd_ensemble = w_xgb * pd_xgb + w_lgb * pd_lgb + w_lr * pd_lr
 
     # Risk band
     if pd_ensemble < 0.08:
@@ -207,10 +214,11 @@ def predict_pd(
 
     result = {
         'pd_xgboost': round(pd_xgb, 6),
+        'pd_lightgbm': round(pd_lgb, 6),
         'pd_logistic': round(pd_lr, 6),
         'pd_ensemble': round(pd_ensemble, 6),
         'risk_band': risk_band,
-        'ensemble_weights': {'xgboost': w_xgb, 'logistic': w_lr},
+        'ensemble_weights': {'xgboost': w_xgb, 'lightgbm': w_lgb, 'logistic': w_lr},
         'key_features': {
             'dti_ratio': round(dti_ratio, 4),
             'income_stability': round(income_stability_score, 4),

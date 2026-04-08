@@ -19,7 +19,7 @@ The system is built on a **Five-Layer Decision Waterfall**:
 
 | Layer | Name | Technical Core | Purpose |
 | :--- | :--- | :--- | :--- |
-| **1** | **Risk Modeling** | Hybrid Ensemble (XGBoost + Logistic) | Estimates the raw Probability of Default (PD). |
+| **1** | **Risk Modeling** | Triple Threat Ensemble (XGB + LGBM + LR) | Estimates the raw Probability of Default (PD). |
 | **2** | **Expected Loss (EL)** | $PD \times LGD \times EAD$ Framework | Sets the minimum interest rate floor to cover risk. |
 | **3** | **Price Elasticity** | Logistic Conversion Curve | Models how acceptance probability drops as rates rise. |
 | **4** | **Optimization** | Scipy Bounded Minimization | Finds the rate that maximizes E[Profit] per applicant. |
@@ -29,8 +29,11 @@ The system is built on a **Five-Layer Decision Waterfall**:
 
 ## 🛠️ Key Features
 
-### 1. Hybrid Ensemble Underwriting
-The engine uses a combination of **XGBoost** for maximum predictive precision and **Logistic Regression (with WoE Encoding)** for regulatory auditability. The weights are dynamically managed based on the compliance-vs-performance tradeoff.
+### 1. Triple Threat Ensemble Underwriting
+The engine utilizes a sophisticated multi-model ensemble designed to balance precision, scalability, and auditability:
+- **XGBoost**: Gradient boosted trees for high-precision non-linear pattern capture.
+- **LightGBM**: Efficient high-performance boosting for complex feature interactions.
+- **Logistic Regression**: A stability-driven scorecard approach with WoE encoding for regulatory compliance.
 
 ### 2. Market-Aware Optimization
 The `PricingOptimizer` doesn't just look inward. It integrates:

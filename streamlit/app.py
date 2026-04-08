@@ -204,9 +204,11 @@ def load_v2_models():
 
     artifacts = {
         'xgb_model':    joblib.load(os.path.join(models_path, 'xgboost_model.joblib')),
+        'lgb_model':    joblib.load(os.path.join(models_path, 'lightgbm_model.joblib')),
         'lr_model':     joblib.load(os.path.join(models_path, 'logistic_model.joblib')),
         'lr_scaler':    joblib.load(os.path.join(models_path, 'logistic_scaler.joblib')),
         'xgb_feats':    joblib.load(os.path.join(models_path, 'xgb_feature_columns.joblib')),
+        'lgb_feats':    joblib.load(os.path.join(models_path, 'lgb_feature_columns.joblib')),
         'lr_feats':     joblib.load(os.path.join(models_path, 'lr_feature_columns.joblib')),
         'shap_explainer': joblib.load(os.path.join(models_path, 'shap_explainer.joblib')),
     }
@@ -262,29 +264,34 @@ def engineer_features(income, credit, annuity, days_birth, days_employed,
     return features
 
 
-def predict_pd_v2(features, models, w_xgb_override=None, w_lr_override=None):
+def predict_pd_v2(features, models, w_xgb_override=None, w_lgb_override=None, w_lr_override=None):
     """Run V2 ensemble with optional weight overrides."""
     xgb_feats = models['xgb_feats']
+    lgb_feats = models['lgb_feats']
     lr_feats = models['lr_feats']
     
     # Build feature vectors
     xgb_dict = {col: features.get(col, 0.0) for col in xgb_feats}
+    lgb_dict = {col: features.get(col, 0.0) for col in lgb_feats}
     lr_dict = {col: features.get(col, 0.0) for col in lr_feats}
 
     X_xgb = pd.DataFrame([xgb_dict])[xgb_feats]
+    X_lgb = pd.DataFrame([lgb_dict])[lgb_feats]
     X_lr = pd.DataFrame([lr_dict])[lr_feats]
 
     # Predict
     pd_xgb = float(models['xgb_model'].predict_proba(X_xgb)[:, 1][0])
+    pd_lgb = float(models['lgb_model'].predict_proba(X_lgb)[:, 1][0])
     X_lr_scaled = models['lr_scaler'].transform(X_lr)
     pd_lr = float(models['lr_model'].predict_proba(X_lr_scaled)[:, 1][0])
 
     # Weights
     cfg_weights = models['ensemble_config']['optimal_weights']
-    w_xgb = w_xgb_override if w_xgb_override is not None else cfg_weights['xgboost']
-    w_lr = w_lr_override if w_lr_override is not None else cfg_weights['logistic']
+    w_xgb = w_xgb_override if w_xgb_override is not None else cfg_weights.get('xgboost', 0.4)
+    w_lgb = w_lgb_override if w_lgb_override is not None else cfg_weights.get('lightgbm', 0.3)
+    w_lr = w_lr_override if w_lr_override is not None else cfg_weights.get('logistic', 0.3)
 
-    pd_ensemble = w_xgb * pd_xgb + w_lr * pd_lr
+    pd_ensemble = w_xgb * pd_xgb + w_lgb * pd_lgb + w_lr * pd_lr
 
     # Risk band
     if pd_ensemble < 0.08:
@@ -296,10 +303,12 @@ def predict_pd_v2(features, models, w_xgb_override=None, w_lr_override=None):
 
     return {
         'pd_xgb': pd_xgb,
+        'pd_lgb': pd_lgb,
         'pd_lr': pd_lr,
         'pd_ensemble': pd_ensemble,
         'risk_band': risk_band,
         'w_xgb': w_xgb,
+        'w_lgb': w_lgb,
         'w_lr': w_lr,
     }
 
@@ -546,13 +555,14 @@ def render_sidebar():
         # ── Compliance Override ──
         st.markdown("### ⚖️ Compliance Override")
         models = load_v2_models()
-        default_w = models['ensemble_config']['optimal_weights']['xgboost']
-        w_xgb = st.slider(
-            "XGBoost Weight",
-            0.0, 1.0, float(default_w), 0.01,
-            help="Shift toward LogReg (left) for interpretability or XGBoost (right) for accuracy"
-        )
-        st.caption(f"XGB: {w_xgb:.0%} | LR: {1-w_xgb:.0%}")
+        cfg_w = models['ensemble_config']['optimal_weights']
+        
+        # Dirichlet-style sum-to-1 weighting
+        w_xgb = st.slider("XGBoost Weight", 0.0, 1.0, float(cfg_w.get('xgboost', 0.4)), 0.01)
+        w_lgb = st.slider("LightGBM Weight", 0.0, 1.0 - w_xgb, float(cfg_w.get('lightgbm', 0.3)), 0.01)
+        w_lr = round(1.0 - w_xgb - w_lgb, 2)
+        
+        st.caption(f"XGB: {w_xgb:.0%} | LGB: {w_lgb:.0%} | LR: {w_lr:.0%}")
 
         st.divider()
 
@@ -618,7 +628,8 @@ def main():
             pd_result = predict_pd_v2(
                 features, models,
                 w_xgb_override=inputs['w_xgb'],
-                w_lr_override=1 - inputs['w_xgb']
+                w_lgb_override=inputs['w_lgb'],
+                w_lr_override=inputs['w_lr']
             )
 
             # Layer 2: Expected Loss
@@ -670,7 +681,7 @@ def main():
             <div class="metric-card">
                 <div class="metric-label">Probability of Default</div>
                 <div class="metric-value">{pd_r['pd_ensemble']*100:.2f}%</div>
-                <div class="metric-sublabel">XGB: {pd_r['pd_xgb']*100:.1f}% | LR: {pd_r['pd_lr']*100:.1f}%</div>
+                <div class="metric-sublabel">XGB: {pd_r['pd_xgb']*100:.1f}% | LGB: {pd_r['pd_lgb']*100:.1f}% | LR: {pd_r['pd_lr']*100:.1f}%</div>
             </div>""", unsafe_allow_html=True)
 
         with c3:
@@ -772,11 +783,14 @@ def main():
 
         # ── Row 5: Ensemble Weights Comparison ──
         with st.expander("⚖️ Ensemble Weight Details"):
-            w_col1, w_col2 = st.columns(2)
+            w_col1, w_col2, w_col3 = st.columns(3)
             with w_col1:
                 st.metric("XGBoost Weight", f"{pd_r['w_xgb']:.1%}")
                 st.metric("XGBoost PD", f"{pd_r['pd_xgb']*100:.4f}%")
             with w_col2:
+                st.metric("LightGBM Weight", f"{pd_r['w_lgb']:.1%}")
+                st.metric("LightGBM PD", f"{pd_r['pd_lgb']*100:.4f}%")
+            with w_col3:
                 st.metric("LogReg Weight", f"{pd_r['w_lr']:.1%}")
                 st.metric("LogReg PD", f"{pd_r['pd_lr']*100:.4f}%")
 
