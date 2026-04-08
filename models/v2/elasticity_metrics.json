@@ -1,0 +1,20 @@
+{
+  "version": "V2 \u2014 Optuna-calibrated elasticity model",
+  "cv_auc": -0.5968885415412799,
+  "full_auc": 0.5443366089993293,
+  "log_loss": 0.5968384444383441,
+  "brier_score": 0.20358334638859327,
+  "best_params": {
+    "C": 0.38969061546464456
+  },
+  "features": [
+    "rate_spread",
+    "pd_ensemble",
+    "log_amt_credit",
+    "log_amt_income",
+    "spread_x_pd",
+    "spread_x_log_credit",
+    "spread_x_log_income"
+  ],
+  "n_samples": 61503
+}

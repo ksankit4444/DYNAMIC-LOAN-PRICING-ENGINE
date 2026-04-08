@@ -1,0 +1,17 @@
+apiVersion: 1
+datasources:
+- access: proxy
+  database: loan_pricing_engine
+  editable: true
+  isDefault: true
+  jsonData:
+    database: loan_pricing_engine
+    postgresVersion: 1500
+    sslmode: disable
+  name: LoanPricingDB
+  secureJsonData:
+    password: password
+  type: postgres
+  uid: loanpricingdb
+  url: host.docker.internal:5432
+  user: postgres

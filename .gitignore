@@ -1,0 +1,37 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Data (large files)
+data/raw/*.csv
+data/processed/*.csv
+*.db
+
+# Model artifacts
+models/*.joblib
+models/*.pkl
+models/*.json
+
+# Config with secrets
+configs/config.yaml
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+_doc_content.txt
+_pdf_content.txt

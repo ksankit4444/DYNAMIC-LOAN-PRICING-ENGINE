@@ -1,0 +1,297 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Current Market Rates (Low / Medium / High)",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "percentunit",
+          "thresholds": {
+            "steps": [
+              {
+                "color": "#818cf8",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT low_risk_rate, medium_risk_rate, high_risk_rate FROM market_benchmarks WHERE is_active = 1 ORDER BY fetched_at DESC LIMIT 1;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Benchmark Source & Freshness",
+      "type": "table",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT fetch_type, confidence_score, fetched_at, expires_at, CASE WHEN expires_at > NOW() THEN 'ACTIVE' ELSE 'EXPIRED' END as status FROM market_benchmarks WHERE is_active = 1 ORDER BY fetched_at DESC LIMIT 5;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Portfolio Rate Competitiveness",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.03
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT AVG(la.quoted_rate - CASE la.risk_band WHEN 'Low' THEN mb.low_risk_rate WHEN 'Medium' THEN mb.medium_risk_rate WHEN 'High' THEN mb.high_risk_rate END) as avg_spread_over_market FROM loan_applications la CROSS JOIN (SELECT * FROM market_benchmarks WHERE is_active = 1 ORDER BY fetched_at DESC LIMIT 1) mb;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Quoted Rate vs Market Benchmark by Risk Band",
+      "type": "barchart",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "percentunit"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT la.risk_band, AVG(la.quoted_rate) as avg_quoted_rate, AVG(la.min_rate_floor) as avg_rate_floor, AVG(CASE la.risk_band WHEN 'Low' THEN mb.low_risk_rate WHEN 'Medium' THEN mb.medium_risk_rate WHEN 'High' THEN mb.high_risk_rate END) as market_benchmark FROM loan_applications la CROSS JOIN (SELECT * FROM market_benchmarks WHERE is_active = 1 ORDER BY fetched_at DESC LIMIT 1) mb GROUP BY la.risk_band ORDER BY la.risk_band;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Acceptance Probability Distribution",
+      "type": "histogram",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT acceptance_probability, risk_band FROM loan_applications ORDER BY acceptance_probability;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Scenario: What-If Rate Floor Tightens?",
+      "description": "Simulates how many applications change from APPROVE to DECLINE if PD threshold drops from 10% to 5%",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT 'Current (PD < 10%)' as scenario, COUNT(*) FILTER (WHERE pd_ensemble < 0.10) as approvals, SUM(amt_credit) FILTER (WHERE pd_ensemble < 0.10) as total_exposure, AVG(expected_profit) FILTER (WHERE pd_ensemble < 0.10) as avg_profit FROM loan_applications UNION ALL SELECT 'Tightened (PD < 5%)', COUNT(*) FILTER (WHERE pd_ensemble < 0.05), SUM(amt_credit) FILTER (WHERE pd_ensemble < 0.05), AVG(expected_profit) FILTER (WHERE pd_ensemble < 0.05) FROM loan_applications UNION ALL SELECT 'Loosened (PD < 15%)', COUNT(*) FILTER (WHERE pd_ensemble < 0.15), SUM(amt_credit) FILTER (WHERE pd_ensemble < 0.15), AVG(expected_profit) FILTER (WHERE pd_ensemble < 0.15) FROM loan_applications;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Profitability vs Default Risk Trade-off",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "points",
+            "pointSize": 6
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT created_at as time, expected_profit, pd_ensemble, risk_band FROM loan_applications WHERE $__timeFilter(created_at) ORDER BY created_at;",
+          "format": "time_series",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Rate Spread: Quoted vs Floor Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "percentunit",
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT date_trunc('day', created_at) as time, AVG(quoted_rate) as avg_quoted_rate, AVG(min_rate_floor) as avg_rate_floor, AVG(quoted_rate - min_rate_floor) as avg_margin FROM loan_applications WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1;",
+          "format": "time_series",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": [
+    "loan-pricing",
+    "scenario",
+    "market"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Scenario Analysis & Market Intelligence",
+  "uid": "loan-scenario-analysis"
+}

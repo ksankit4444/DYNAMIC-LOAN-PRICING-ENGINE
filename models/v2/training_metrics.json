@@ -1,0 +1,46 @@
+{
+  "xgboost": {
+    "auc_roc": 0.778859,
+    "ks_statistic": 0.41785,
+    "ks_threshold": 0.485768,
+    "gini_coefficient": 0.557718
+  },
+  "lightgbm": {
+    "auc_roc": 0.721288,
+    "ks_statistic": 0.339196,
+    "ks_threshold": 0.128428,
+    "gini_coefficient": 0.442576
+  },
+  "logistic": {
+    "auc_roc": 0.757899,
+    "ks_statistic": 0.381602,
+    "ks_threshold": 0.508397,
+    "gini_coefficient": 0.515799
+  },
+  "ensemble": {
+    "auc_roc": 0.77848,
+    "ks_statistic": 0.417555,
+    "ks_threshold": 0.463354,
+    "gini_coefficient": 0.556959
+  },
+  "best_params": {
+    "xgb_max_depth": 4,
+    "xgb_learning_rate": 0.038434737936484706,
+    "xgb_subsample": 0.8019381452711539,
+    "xgb_colsample": 0.6370393284941344,
+    "xgb_gamma": 2.6189747831482495,
+    "xgb_lambda": 9.476808361535864,
+    "xgb_alpha": 0.03753272639710534,
+    "lgb_num_leaves": 113,
+    "lgb_learning_rate": 0.09985057099489024,
+    "lgb_feature_fraction": 0.8992619428948744,
+    "lgb_bagging_fraction": 0.5426126442141459,
+    "lgb_max_depth": 9,
+    "lr_c": 0.0027858764170482857,
+    "w_xgb": 0.788862895611624,
+    "w_lgb": 0.09198972901721779
+  },
+  "data_summary": {
+    "samples": 246008
+  }
+}

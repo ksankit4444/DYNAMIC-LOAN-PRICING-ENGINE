@@ -1,0 +1,24 @@
+{
+  "optimal_weights": {
+    "xgboost": 0.788862895611624,
+    "lightgbm": 0.09198972901721779,
+    "logistic": 0.11914737537115817
+  },
+  "optimal_params": {
+    "xgb_max_depth": 4,
+    "xgb_learning_rate": 0.038434737936484706,
+    "xgb_subsample": 0.8019381452711539,
+    "xgb_colsample": 0.6370393284941344,
+    "xgb_gamma": 2.6189747831482495,
+    "xgb_lambda": 9.476808361535864,
+    "xgb_alpha": 0.03753272639710534,
+    "lgb_num_leaves": 113,
+    "lgb_learning_rate": 0.09985057099489024,
+    "lgb_feature_fraction": 0.8992619428948744,
+    "lgb_bagging_fraction": 0.5426126442141459,
+    "lgb_max_depth": 9,
+    "lr_c": 0.0027858764170482857,
+    "w_xgb": 0.788862895611624,
+    "w_lgb": 0.09198972901721779
+  }
+}

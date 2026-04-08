@@ -1,0 +1,507 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Total Applications",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "#6366f1",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) as total FROM loan_applications;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Total Exposure (\u00e2\u201a\u00b9)",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "#818cf8",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyINR"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT SUM(amt_credit) as total_exposure FROM loan_applications WHERE decision = 'APPROVE';",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Avg PD (Ensemble)",
+      "type": "gauge",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.3
+              }
+            ]
+          },
+          "max": 1,
+          "min": 0,
+          "unit": "percentunit"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT AVG(pd_ensemble) as avg_pd FROM loan_applications;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Total Expected Loss (\u00e2\u201a\u00b9)",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "#f87171",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyINR"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT SUM(expected_loss) as total_el FROM loan_applications;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Avg Expected Profit (\u00e2\u201a\u00b9)",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "#34d399",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyINR"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT AVG(expected_profit) as avg_profit FROM loan_applications WHERE decision = 'APPROVE';",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Approval Rate",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "percentunit"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT CAST(SUM(CASE WHEN decision='APPROVE' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*) as approval_rate FROM loan_applications;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Applications Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 15,
+            "lineWidth": 2
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT date_trunc('day', created_at) as time, COUNT(*) as applications, AVG(pd_ensemble) as avg_pd FROM loan_applications WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1;",
+          "format": "time_series",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Risk Band Distribution",
+      "type": "piechart",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT risk_band, COUNT(*) as count FROM loan_applications GROUP BY risk_band ORDER BY risk_band;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Decision Breakdown",
+      "type": "piechart",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT decision, COUNT(*) as count FROM loan_applications GROUP BY decision ORDER BY decision;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "PD Distribution by Risk Band",
+      "type": "histogram",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT pd_ensemble, risk_band FROM loan_applications ORDER BY pd_ensemble;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Avg Quoted Rate by Risk Band",
+      "type": "barchart",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "percentunit"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT risk_band, AVG(quoted_rate) as avg_rate, AVG(min_rate_floor) as avg_floor, AVG(acceptance_probability) as avg_acceptance FROM loan_applications GROUP BY risk_band ORDER BY risk_band;",
+          "format": "table",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Expected Loss vs Income",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "points",
+            "pointSize": 5
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT created_at as time, expected_loss, amt_credit, risk_band FROM loan_applications WHERE $__timeFilter(created_at) ORDER BY created_at;",
+          "format": "time_series",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Portfolio Cumulative Exposure Over Time (\u00e2\u201a\u00b9)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "datasource": {
+        "uid": "loanpricingdb",
+        "type": "postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "#818cf8",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyINR",
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 2
+          }
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT date_trunc('day', created_at) as time, SUM(amt_credit) as daily_exposure, SUM(expected_loss) as daily_el FROM loan_applications WHERE decision = 'APPROVE' AND $__timeFilter(created_at) GROUP BY 1 ORDER BY 1;",
+          "format": "time_series",
+          "datasource": {
+            "uid": "loanpricingdb",
+            "type": "postgres"
+          }
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": [
+    "loan-pricing",
+    "portfolio",
+    "risk"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Portfolio Analytics",
+  "uid": "loan-portfolio-analytics"
+}

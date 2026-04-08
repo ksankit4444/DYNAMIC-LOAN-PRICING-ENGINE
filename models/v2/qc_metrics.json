@@ -1,0 +1,170 @@
+{
+    "metrics": {
+        "thresh_0.50": {
+            "accuracy": 0.7612636781945596,
+            "precision": 0.19744707347447074,
+            "recall": 0.6386706948640484,
+            "f1": 0.301640903686088,
+            "auc_roc": 0.7784796807337593
+        },
+        "thresh_0.46": {
+            "accuracy": 0.7219647822057461,
+            "precision": 0.180943366461587,
+            "recall": 0.6930513595166163,
+            "f1": 0.28696522391793844,
+            "auc_roc": 0.7784796807337593
+        }
+    },
+    "ks_stats": {
+        "ks_stat": 0.4175552330176245,
+        "ks_threshold": 0.4633540501583083
+    },
+    "waterfall_audit": [
+        {
+            "tier": "Elite",
+            "count": 181,
+            "population_pct": 0.0029,
+            "default_rate": 0.0
+        },
+        {
+            "tier": "Bureau Prime",
+            "count": 228,
+            "population_pct": 0.0037,
+            "default_rate": 0.0132
+        },
+        {
+            "tier": "Engine Core",
+            "count": 31408,
+            "population_pct": 0.5107,
+            "default_rate": 0.0261
+        },
+        {
+            "tier": "Watchlist",
+            "count": 29686,
+            "population_pct": 0.4827,
+            "default_rate": 0.1395
+        }
+    ],
+    "vif": [
+        {
+            "feature": "ext_source_prod",
+            "VIF": 12.878817958643957
+        },
+        {
+            "feature": "ext_source_min",
+            "VIF": 9.886744474047605
+        },
+        {
+            "feature": "EXT_SOURCE_2",
+            "VIF": 9.346913111113997
+        },
+        {
+            "feature": "EXT_SOURCE_3",
+            "VIF": 8.137582977440065
+        },
+        {
+            "feature": "AMT_GOODS_PRICE",
+            "VIF": 7.17851271806295
+        },
+        {
+            "feature": "ext_source_max",
+            "VIF": 5.812658804558108
+        },
+        {
+            "feature": "EXT_SOURCE_1",
+            "VIF": 5.288451048139259
+        },
+        {
+            "feature": "DAYS_EMPLOYED",
+            "VIF": 4.8325067381727465
+        },
+        {
+            "feature": "AMT_ANNUITY",
+            "VIF": 4.782698803261666
+        },
+        {
+            "feature": "annuity_credit_ratio",
+            "VIF": 2.8789207222368955
+        },
+        {
+            "feature": "NAME_INCOME_TYPE_woe",
+            "VIF": 2.6389700453723983
+        },
+        {
+            "feature": "age_years",
+            "VIF": 2.218273017824971
+        },
+        {
+            "feature": "ORGANIZATION_TYPE_woe",
+            "VIF": 2.117446334581055
+        },
+        {
+            "feature": "bureau_active_count",
+            "VIF": 1.4945920026139519
+        },
+        {
+            "feature": "documents_provided_count",
+            "VIF": 1.485629369105026
+        },
+        {
+            "feature": "employment_years",
+            "VIF": 1.4821395711969783
+        },
+        {
+            "feature": "FLAG_DOCUMENT_3",
+            "VIF": 1.4558875145597452
+        },
+        {
+            "feature": "goods_credit_ratio",
+            "VIF": 1.3194957064405515
+        },
+        {
+            "feature": "prev_refused_count",
+            "VIF": 1.2622779166901217
+        },
+        {
+            "feature": "prev_approved_rate",
+            "VIF": 1.253959713520743
+        },
+        {
+            "feature": "credit_utilization",
+            "VIF": 1.2490349757311914
+        },
+        {
+            "feature": "bureau_credit_sum",
+            "VIF": 1.2299813924729275
+        },
+        {
+            "feature": "NAME_EDUCATION_TYPE_woe",
+            "VIF": 1.1431706767181273
+        },
+        {
+            "feature": "REGION_RATING_CLIENT_W_CITY",
+            "VIF": 1.139195278845968
+        },
+        {
+            "feature": "CODE_GENDER_woe",
+            "VIF": 1.126486273556478
+        },
+        {
+            "feature": "NAME_FAMILY_STATUS_woe",
+            "VIF": 1.0777254887222067
+        },
+        {
+            "feature": "REG_CITY_NOT_LIVE_CITY",
+            "VIF": 1.0455479304594124
+        },
+        {
+            "feature": "OWN_CAR_AGE",
+            "VIF": 1.0131928054819423
+        },
+        {
+            "feature": "DEF_30_CNT_SOCIAL_CIRCLE",
+            "VIF": 1.0051858140353866
+        },
+        {
+            "feature": "AMT_REQ_CREDIT_BUREAU_QRT",
+            "VIF": 1.0049843023954952
+        }
+    ]
+}
