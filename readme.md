@@ -91,7 +91,3 @@ To run the full pipeline, place the following files in `data/raw/`:
 - `bureau.csv`
 - `previous_application.csv`
 
----
-
-## 📈 CV & Portfolio Framing
-**The Pitch**: "Developed a dynamic pricing system that optimizes interest rate recommendations by synthesizing XGBoost risk scores with price elasticity curves. Implemented a LangGraph agentic layer to provide SHAP-based explainability and integrated a Grafana-based PSI monitoring dashboard for production drift detection."
